@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Workout Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f18;
+    --surface: #111827;
+    --card: #161d2e;
+    --card-hover: #1c2438;
+    --accent: #4da6ff;
+    --accent2: #7ec8ff;
+    --text: #e8edf5;
+    --muted: #5a6a82;
+    --border: #1e2d45;
+    --done: #0f2236;
+    --done-border: #2d7dd2;
+    --done-text: #5ab0ff;
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+min-height: 100vh;
+background-image:
+radial-gradient(ellipse 80% 40% at 50% -10%, rgba(77,166,255,0.08) 0%, transparent 70%),
+repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px),
+repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px);
+}
+
+header {
+padding: 3rem 2rem 1.5rem;
+text-align: center;
+position: relative;
+}
+
+header .week-badge {
+display: inline-block;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.7rem;
+font-weight: 600;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–accent);
+background: rgba(77,166,255,0.1);
+border: 1px solid rgba(77,166,255,0.25);
+padding: 0.3rem 1rem;
+border-radius: 2rem;
+margin-bottom: 1rem;
+}
+
+h1 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(3rem, 8vw, 6rem);
+letter-spacing: 0.04em;
+line-height: 0.9;
+color: var(–text);
+}
+
+h1 span { color: var(–accent); }
+
+.subtitle {
+margin-top: 0.75rem;
+color: var(–muted);
+font-size: 0.9rem;
+font-weight: 300;
+letter-spacing: 0.05em;
+}
+
+.progress-bar-wrap {
+max-width: 700px;
+margin: 2rem auto 0;
+padding: 0 1rem;
+}
+
+.progress-meta {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 0.5rem;
+font-size: 0.75rem;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 0.1em;
+}
+
+.progress-meta strong { color: var(–accent); font-size: 1rem; }
+
+.progress-bar {
+height: 6px;
+background: var(–border);
+border-radius: 3px;
+overflow: hidden;
+}
+
+.progress-fill {
+height: 100%;
+background: linear-gradient(90deg, #4da6ff, #a0d4ff);
+border-radius: 3px;
+transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+main {
+max-width: 760px;
+margin: 2rem auto 4rem;
+padding: 0 1.25rem;
+display: flex;
+flex-direction: column;
+gap: 1rem;
+}
+
+.day-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 16px;
+overflow: hidden;
+transition: border-color 0.3s, transform 0.2s;
+position: relative;
+}
+
+.day-card:hover { border-color: #3a3a50; transform: translateY(-1px); }
+
+.day-card.today { border-color: rgba(77,166,255,0.4); }
+.day-card.today::before {
+content: ‘TODAY’;
+position: absolute;
+top: 1rem;
+right: 1rem;
+font-size: 0.6rem;
+font-weight: 700;
+letter-spacing: 0.2em;
+color: white;
+background: var(–accent);
+padding: 0.25rem 0.6rem;
+border-radius: 2rem;
+}
+
+.day-card.completed {
+background: var(–done);
+border-color: var(–done-border);
+opacity: 0.85;
+}
+
+.day-card.completed .day-header { border-bottom-color: rgba(76,175,80,0.2); }
+
+.day-header {
+padding: 1.25rem 1.5rem;
+display: flex;
+align-items: center;
+gap: 1rem;
+border-bottom: 1px solid var(–border);
+cursor: pointer;
+user-select: none;
+}
+
+.day-number {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 2.2rem;
+color: var(–muted);
+line-height: 1;
+min-width: 2.5rem;
+transition: color 0.3s;
+}
+
+.day-card.today .day-number { color: var(–accent); }
+.day-card.completed .day-number { color: var(–done-text); }
+
+.day-info { flex: 1; }
+
+.day-name {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.6rem;
+letter-spacing: 0.06em;
+line-height: 1;
+}
+
+.day-focus {
+font-size: 0.72rem;
+text-transform: uppercase;
+letter-spacing: 0.15em;
+color: var(–muted);
+margin-top: 0.2rem;
+}
+
+.day-card.completed .day-focus { color: var(–done-text); }
+
+.day-actions {
+display: flex;
+align-items: center;
+gap: 0.75rem;
+}
+
+.exercise-count {
+font-size: 0.72rem;
+color: var(–muted);
+letter-spacing: 0.05em;
+}
+
+.check-btn {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+border: 2px solid var(–border);
+background: transparent;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.25s;
+flex-shrink: 0;
+}
+
+.check-btn:hover { border-color: var(–accent); background: rgba(77,166,255,0.1); }
+.day-card.completed .check-btn { border-color: var(–done-border); background: var(–done-border); }
+
+.check-btn svg { width: 16px; height: 16px; }
+.check-btn .check-icon { stroke: transparent; transition: stroke 0.2s; }
+.day-card.completed .check-btn .check-icon { stroke: white; }
+
+.chevron {
+width: 20px;
+height: 20px;
+color: var(–muted);
+transition: transform 0.3s;
+flex-shrink: 0;
+}
+
+.day-card.open .chevron { transform: rotate(180deg); }
+
+.exercises {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.day-card.open .exercises { max-height: 800px; }
+
+.exercises-inner {
+padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.exercise-item {
+display: flex;
+align-items: flex-start;
+gap: 0.85rem;
+padding: 0.65rem 0;
+border-bottom: 1px solid rgba(255,255,255,0.04);
+font-size: 0.9rem;
+color: #c0c0d0;
+cursor: pointer;
+transition: color 0.2s;
+user-select: none;
+}
+
+.exercise-item:last-child { border-bottom: none; }
+.exercise-item:hover { color: var(–text); }
+
+.exercise-item.checked { color: var(–muted); text-decoration: line-through; }
+
+.ex-check {
+width: 18px;
+height: 18px;
+border: 1.5px solid var(–border);
+border-radius: 4px;
+flex-shrink: 0;
+margin-top: 1px;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.2s;
+background: transparent;
+}
+
+.exercise-item:hover .ex-check { border-color: var(–accent); }
+.exercise-item.checked .ex-check {
+background: var(–done-border);
+border-color: var(–done-border);
+}
+
+.ex-check svg { width: 10px; height: 10px; stroke: white; opacity: 0; transition: opacity 0.15s; }
+.exercise-item.checked .ex-check svg { opacity: 1; }
+
+.ex-label { line-height: 1.4; }
+.ex-label .note { font-size: 0.75rem; color: var(–muted); display: block; margin-top: 0.1rem; }
+
+.ex-special {
+display: inline-flex;
+align-items: center;
+gap: 0.3rem;
+font-size: 0.62rem;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+font-weight: 600;
+color: var(–accent2);
+border: 1px solid rgba(255,107,53,0.3);
+padding: 0.15rem 0.45rem;
+border-radius: 3px;
+margin-left: 0.5rem;
+vertical-align: middle;
+}
+
+/* Bottom bar */
+.bottom-bar {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: rgba(10,10,15,0.9);
+backdrop-filter: blur(16px);
+border-top: 1px solid var(–border);
+padding: 1rem 1.5rem;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 1rem;
+}
+
+.bottom-info {
+font-size: 0.78rem;
+color: var(–muted);
+}
+
+.bottom-info strong { color: var(–text); }
+
+.reset-btn {
+padding: 0.55rem 1.25rem;
+border-radius: 8px;
+border: 1px solid var(–border);
+background: transparent;
+color: var(–muted);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.78rem;
+font-weight: 500;
+letter-spacing: 0.05em;
+cursor: pointer;
+transition: all 0.2s;
+display: flex;
+align-items: center;
+gap: 0.4rem;
+}
+
+.reset-btn:hover { border-color: var(–accent2); color: var(–accent2); }
+
+.toast {
+position: fixed;
+top: 1.5rem;
+right: 1.5rem;
+background: var(–accent);
+color: white;
+font-weight: 600;
+font-size: 0.82rem;
+padding: 0.75rem 1.25rem;
+border-radius: 8px;
+opacity: 0;
+transform: translateY(-10px);
+transition: all 0.3s;
+pointer-events: none;
+z-index: 999;
+}
+
+.toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 480px) {
+h1 { font-size: 3rem; }
+.day-header { padding: 1rem 1.1rem; }
+.exercises-inner { padding: 1rem 1.1rem 1.25rem; }
+.bottom-bar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="week-badge" id="weekBadge">Week of —</div>
+  <h1>WEEKLY<br><span>GRIND</span></h1>
+  <p class="subtitle">Mon – Fri · Press & Persist</p>
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span>Weekly Progress</span>
+      <strong id="progressText">0 / 5</strong>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</header>
+
+<main id="dayCards"></main>
+
+<div class="bottom-bar">
+  <div class="bottom-info">
+    <strong id="nextLabel">Next up:</strong> <span id="nextDay">—</span>
+  </div>
+  <button class="reset-btn" onclick="resetWeek()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    Reset Week
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WORKOUTS = [
+  {
+    day: "Monday",
+    short: "MON",
+    num: "01",
+    focus: "Shoulders & Core",
+    exercises: [
+      { name: "Shoulder Press", note: "Dumbbell or Barbell" },
+      { name: "Front / Side / Rear Raises" },
+      { name: "Leg Raises", note: "Core", special: "CORE" },
+      { name: "Arnold Presses" },
+      { name: "Upright Row" },
+      { name: "Ab Machine", special: "CORE" },
+      { name: "Shrugs" },
+      { name: "Bible Reading + Treadmill Walk", note: "15 minutes minimum", special: "SPIRIT" },
+    ]
+  },
+  {
+    day: "Tuesday",
+    short: "TUE",
+    num: "02",
+    focus: "Back & Biceps",
+    exercises: [
+      { name: "Lat Pulldown" },
+      { name: "Rows", note: "Cable or Barbell" },
+      { name: "Cable Curls" },
+      { name: "Good Morning", note: "Assisted on machine" },
+      { name: "Dumbbell Curls" },
+      { name: "Bible Reading + Treadmill Walk", note: "15 minutes minimum", special: "SPIRIT" },
+    ]
+  },
+  {
+    day: "Wednesday",
+    short: "WED",
+    num: "03",
+    focus: "Legs",
+    exercises: [
+      { name: "Squats" },
+      { name: "Calf Raises", note: "Forward and backward" },
+      { name: "Hamstring", note: "Good Morning or machine" },
+      { name: "Quads", note: "Machine or leg press" },
+      { name: "Bible Reading + Treadmill Walk", note: "15 minutes minimum", special: "SPIRIT" },
+    ]
+  },
+  {
+    day: "Thursday",
+    short: "THU",
+    num: "04",
+    focus: "Arms, Core & Running",
+    exercises: [
+      { name: "Bicep Barbell Curl" },
+      { name: "Tricep Dip / Dumbbell" },
+      { name: "Core Twist", note: "Cables", special: "CORE" },
+      { name: "Sit-ups (machine) + Leg Lifts", special: "CORE" },
+      { name: "Run", note: "1 mile — building up over time! 🏃", special: "CARDIO" },
+    ]
+  },
+  {
+    day: "Friday",
+    short: "FRI",
+    num: "05",
+    focus: "Chest & Triceps",
+    exercises: [
+      { name: "Dumbbell Bench Press" },
+      { name: "Dumbbell Fly" },
+      { name: "Tricep Pull Down", note: "Cable" },
+      { name: "Incline Press" },
+      { name: "Cable Pull" },
+      { name: "Bible Reading + Treadmill Walk", note: "15 minutes minimum", special: "SPIRIT" },
+    ]
+  }
+];
+
+// --- State ---
+let state = loadState();
+
+function defaultState() {
+  return {
+    weekStart: getMondayISO(),
+    daysDone: [false, false, false, false, false],
+    exercisesDone: WORKOUTS.map(w => w.exercises.map(() => false))
+  };
+}
+
+function getMondayISO() {
+  const now = new Date();
+  const d = new Date(now);
+  const day = d.getDay();
+  const diff = (day === 0) ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().split('T')[0];
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('workoutTracker_v2');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem('workoutTracker_v2', JSON.stringify(state));
+}
+
+function checkAutoReset() {
+  // Auto-reset if it's a new week (Monday 5am CDT = UTC-5 = 10:00 UTC)
+  const currentMonday = getMondayISO();
+  if (state.weekStart !== currentMonday) {
+    // Check if it's Monday and past 5am CDT
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon
+    const hourCDT = now.getUTCHours() - 5; // CDT offset
+    if (dayOfWeek === 1 && hourCDT >= 5) {
+      state = defaultState();
+      saveState();
+      showToast("🎉 New week! Tracker reset automatically.");
+    } else if (dayOfWeek !== 1) {
+      // It's a different week and not Monday yet — still reset to the new week
+      state = defaultState();
+      saveState();
+    }
+  }
+}
+
+function todayIndex() {
+  const day = new Date().getDay(); // 0=Sun,1=Mon...5=Fri,6=Sat
+  if (day >= 1 && day <= 5) return day - 1;
+  return -1;
+}
+
+// --- Render ---
+function render() {
+  const container = document.getElementById('dayCards');
+  container.innerHTML = '';
+  const today = todayIndex();
+  const doneDays = state.daysDone.filter(Boolean).length;
+
+  WORKOUTS.forEach((workout, i) => {
+    const isToday = i === today;
+    const isDone = state.daysDone[i];
+    const card = document.createElement('div');
+    card.className = 'day-card' + (isToday ? ' today' : '') + (isDone ? ' completed' : '');
+    card.id = `card-${i}`;
+
+    const exDoneCount = state.exercisesDone[i].filter(Boolean).length;
+    const exTotal = workout.exercises.length;
+
+    card.innerHTML = `
+      <div class="day-header" onclick="toggleCard(${i})">
+        <div class="day-number">${workout.num}</div>
+        <div class="day-info">
+          <div class="day-name">${workout.day}</div>
+          <div class="day-focus">${workout.focus}</div>
+        </div>
+        <div class="day-actions">
+          <span class="exercise-count">${exDoneCount}/${exTotal} done</span>
+          <button class="check-btn" title="Mark day complete" onclick="event.stopPropagation(); toggleDay(${i})">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline class="check-icon" points="20 6 9 17 4 12"/>
+            </svg>
+          </button>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+      <div class="exercises">
+        <div class="exercises-inner">
+          ${workout.exercises.map((ex, j) => `
+            <div class="exercise-item${state.exercisesDone[i][j] ? ' checked' : ''}" onclick="toggleExercise(${i}, ${j})">
+              <div class="ex-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="ex-label">
+                ${ex.name}${ex.special ? `<span class="ex-special">${ex.special}</span>` : ''}
+                ${ex.note ? `<span class="note">${ex.note}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  // Progress
+  document.getElementById('progressFill').style.width = (doneDays / 5 * 100) + '%';
+  document.getElementById('progressText').textContent = `${doneDays} / 5`;
+
+  // Week badge
+  const monday = new Date(state.weekStart + 'T00:00:00');
+  const friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  document.getElementById('weekBadge').textContent = `Week of ${fmt(monday)} – ${fmt(friday)}`;
+
+  // Next up
+  const nextIdx = today >= 0 && !state.daysDone[today] ? today :
+    state.daysDone.findIndex(d => !d);
+  if (nextIdx >= 0) {
+    document.getElementById('nextLabel').textContent = 'Next up:';
+    document.getElementById('nextDay').textContent = `${WORKOUTS[nextIdx].day} — ${WORKOUTS[nextIdx].focus}`;
+  } else {
+    document.getElementById('nextLabel').textContent = '🎉';
+    document.getElementById('nextDay').textContent = 'Week complete! Rest up.';
+  }
+
+  // Re-open cards that were open
+  openCards.forEach(i => {
+    const card = document.getElementById(`card-${i}`);
+    if (card) card.classList.add('open');
+  });
+
+  // Auto-open today's card
+  if (today >= 0 && !openCards.has(today) && !openCards.size) {
+    const todayCard = document.getElementById(`card-${today}`);
+    if (todayCard) { todayCard.classList.add('open'); openCards.add(today); }
+  }
+}
+
+const openCards = new Set();
+
+function toggleCard(i) {
+  const card = document.getElementById(`card-${i}`);
+  if (card.classList.contains('open')) {
+    card.classList.remove('open');
+    openCards.delete(i);
+  } else {
+    card.classList.add('open');
+    openCards.add(i);
+  }
+}
+
+function toggleDay(i) {
+  state.daysDone[i] = !state.daysDone[i];
+  if (state.daysDone[i]) {
+    state.exercisesDone[i] = state.exercisesDone[i].map(() => true);
+    showToast(`✅ ${WORKOUTS[i].day} marked complete!`);
+  }
+  saveState();
+  render();
+}
+
+function toggleExercise(dayIdx, exIdx) {
+  state.exercisesDone[dayIdx][exIdx] = !state.exercisesDone[dayIdx][exIdx];
+  // If all exercises checked, mark day done
+  if (state.exercisesDone[dayIdx].every(Boolean)) {
+    state.daysDone[dayIdx] = true;
+    showToast(`🔥 ${WORKOUTS[dayIdx].day} fully complete!`);
+  } else {
+    state.daysDone[dayIdx] = false;
+  }
+  saveState();
+  render();
+}
+
+function resetWeek() {
+  if (confirm('Reset all progress for this week?')) {
+    state = defaultState();
+    openCards.clear();
+    saveState();
+    render();
+    showToast('🔄 Week reset. Let\'s get after it!');
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// Init
+checkAutoReset();
+render();
+
+// Check every minute for Monday 5am CDT auto-reset
+setInterval(() => {
+  checkAutoReset();
+  render();
+}, 60000);
+</script>
+
+</body>
+</html>
